@@ -10,9 +10,13 @@ class Evaluator(object):
     (pairs of data points), both negative and positive by an algorithm.
     """
 
-    def __init__(self):
+    def __init__(self, data=None):
         self._x = None
         self._y = None
+
+        if data is not None:
+            self.set_dataset(data)
+            self.find_distributions()
 
     def set_dataset(self, data):
         """
@@ -32,15 +36,22 @@ class Evaluator(object):
             raise  ValueError('dataset is neither a string or' + \
                               'a tuple of size 2.')
 
-    def find_distributions(self, dataset=None):
+    def find_distributions(self, data=None):
         """
         Given a dataset, this method finds two ``normal'' distributions. One
         for positive pairs and one for negative pairs. These are used for
         later scoring of examples.
         """
-        if dataset is None and (self._x is None or self._y is None):
-            # We don't have a working dataset.
-            raise ValueError('Dataset cannot be None.')
+        if self._x is None and self._y is None: # We don't have data stored.
+            if data is None: # We don't have any data as input.
+                # We don't have a working dataset.
+                raise ValueError('No dataset stored, or given.')
+            elif isinstance(data, tuple) is False or len(data) != 2:
+                # The dataset is in the wrong format
+                raise ValueError('Given dataset is not a tuple of size 2.')
+            self.set_dataset(data)
+        
+        # Now we have the data needed to find the distributions.
 
     @staticmethod
     def evaluate():
