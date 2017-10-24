@@ -50,8 +50,11 @@ class GaussianEvaluator(Evaluator):
         Calculates probability of an absolute difference value belonging to a
         pair type, positive or negative.
         args:
-            diff_value: (ndarray) the absolute difference between two data points.
-            pair_type: ('pos'/'neg') prob of belonging to corresponding Gaussians.
+            - diff_value: (ndarray) the absolute difference between two data points.
+            - pair_type: ('pos'/'neg') prob of belonging to corresponding Gaussians.
+        Returns:
+            - (float in [0.0, 1.0]) The probability of the difference value
+            belonging to either distribution.
         """
         if pair_type == 'pos':
             return self.positive_gaussian.pdf(diff_value) * self.positive_prior
