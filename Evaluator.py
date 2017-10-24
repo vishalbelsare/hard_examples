@@ -16,7 +16,7 @@ class Evaluator(object):
             raise ValueError('data argument of Evaluator object is not filled.')
         if isinstance(data, tuple) is False or len(data) != 2:
             raise ValueError('data should be a tuple of size 2.')
-        self._x, self._y = data
+        self._data, self._label = data
 
     def evaluate(self, **kwargs):
         """

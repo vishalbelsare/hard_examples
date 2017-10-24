@@ -14,7 +14,7 @@ class GaussianEvaluator(Evaluator):
     datapoints belonging to either group, we score the hardness of that pair.
     """
 
-    def __init__(self, data=None):
+    def __init__(self, data):
         # Superclass constructor sets the datasets, if given.
         super(GaussianEvaluator, self).__init__(self, data)
 
@@ -23,32 +23,34 @@ class GaussianEvaluator(Evaluator):
         positive_diffs = []
         negative_diffs = []
         # Going through every pair of data points.
-        for first, second in combinations(range(self._x.shape[0])):
-            diff = np.abs(self._x[first, :] - self._x[second, :])
-            if self._y[first] == self._y[second]: # A positive (same-class) pair.
+        for first, second in combinations(range(self._data.shape[0])):
+            diff = np.abs(self._data[first, :] - self._data[second, :])
+            if self._label[first] == self._label[second]: # A positive (same-class) pair.
                 positive_diffs.append(diff)
             else: # A negative (different class) pair.
                 negative_diffs.append(diff)
 
-        # Fitting two Gaussians for positive and negative pairs.
-        self.positive_gaussian = multivariate_normal(
-            np.mean(positive_diffs, axis=0),
-            np.cov(positive_diffs, rowvar=0) # Covariance between dimensions.
-        )
-        # P(pos) = N(pos)/(N(pos) + N(neg))
-        self.positive_prior = float(len(positive_diffs)) / \
-            (len(positive_diffs) + len(negative_diffs))
-        self.negative_gaussian = multivariate_normal(
-            np.mean(negative_diffs, axis=0),
-            np.cov(negative_diffs, rowvar=0)
-        )
-        # P(neg) = 1 - P(pos) = N(neg)/(N(pos) + N(neg))
-        self.negative_prior = 1.0 - self.positive_prior
+        # Sample usage: self.prob['pos']['gaussian'] = Gaussian for positives
+        self.prob = {
+            'pos': {'gaussian': None, 'prior': None},
+            'neg': {'gaussian': None, 'prior': None}
+        }
+
+        for pair_type, diffs in zip(['pos', 'neg'],
+                                    [positive_diffs, negative_diffs]):
+            self.prob[pair_type]['gaussian'] = multivariate_normal(
+                np.mean(diffs, axis=0),
+                np.cov(diffs, rowvar=0) # Covariance between dimensions.
+            )
+            # Prior = N(self)/N(total)
+            self.prob[pair_type]['prior'] = float(len(diffs)) / \
+                (len(positive_diffs) + len(negative_diffs))
 
     def belong_prob(self, diff_value, pair_type):
         """
         Calculates probability of an absolute difference value belonging to a
-        pair type, positive or negative.
+        pair type, positive or negative. The formula used is:
+        Prob{diff_value in pair_type} = Gaussian(diff_value) * prior(pair_type)
         args:
             - diff_value: (ndarray) the absolute difference between two data points.
             - pair_type: ('pos'/'neg') prob of belonging to corresponding Gaussians.
@@ -56,12 +58,10 @@ class GaussianEvaluator(Evaluator):
             - (float in [0.0, 1.0]) The probability of the difference value
             belonging to either distribution.
         """
-        if pair_type == 'pos':
-            return self.positive_gaussian.pdf(diff_value) * self.positive_prior
-        elif pair_type == 'neg':
-            return self.negative_gaussian.pdf(diff_value) * self.negative_prior
-        else:
+        if pair_type not in ['pos', 'neg']:
             raise ValueError('A pair type is either "pos" or "neg".')
+        return self.prob[pair_type]['gaussian'].pdf(diff_value) * \
+            self.prob[pair_type]['prior']
 
     def evaluate(self, **kwargs):
         """
