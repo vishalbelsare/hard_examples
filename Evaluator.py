@@ -1,68 +1,25 @@
 """
-This module contains an Evaluator class, which includes methods to score
-a ranked set of either negative or positive hard examples.
+This module contains an abstract Evaluator class, which includes methods to
+score a ranked set of either negative or positive hard examples.
 """
 
 
 class Evaluator(object):
     """
-    An Evaluator class, ussed to compare the ``hardness'' of found examples
-    (pairs of data points), both negative and positive by an algorithm.
+    An abstract Evaluator class, ussed to compare the ``hardness'' of found
+    examples (pairs of data points), both negative and positive by an
+    algorithm.
     """
 
-    def __init__(self, data=None):
-        self._x = None
-        self._y = None
+    def __init__(self, data):
+        if data is None:
+            raise ValueError('data argument of Evaluator object is not filled.')
+        if isinstance(data, tuple) is False or len(data) != 2:
+            raise ValueError('data should be a tuple of size 2.')
+        self._x, self._y = data
 
-        if data is not None:
-            self.set_dataset(data)
-            self.find_distributions()
-
-    def set_dataset(self, data):
+    def evaluate(self, **kwargs):
         """
-        data can be either a string, showing the path for the data, or a tuple
-        of (X,y)
+        Evaluates a list of positive or negative pairs.
         """
-
-        if isinstance(data, str):
-            print 'data argument was a string.'
-            raise NotImplementedError('Reading dataset from string is not' + \
-                                      'yet implemented.')
-        elif isinstance(data, tuple) and len(data) == 2:
-            print 'data is a (X,y) tuple.'
-            self._x, self._y = data
-            #TODO: Check if the data is in float numpy arrays.
-        else:
-            raise  ValueError('dataset is neither a string or' + \
-                              'a tuple of size 2.')
-
-    def find_distributions(self, data=None):
-        """
-        Given a dataset, this method finds two ``normal'' distributions. One
-        for positive pairs and one for negative pairs. These are used for
-        later scoring of examples.
-        """
-        if self._x is None and self._y is None: # We don't have data stored.
-            if data is None: # We don't have any data as input.
-                # We don't have a working dataset.
-                raise ValueError('No dataset stored, or given.')
-            elif isinstance(data, tuple) is False or len(data) != 2:
-                # The dataset is in the wrong format
-                raise ValueError('Given dataset is not a tuple of size 2.')
-            self.set_dataset(data)
-        
-        # Now we have the data needed to find the distributions.
-
-    @staticmethod
-    def evaluate():
-        """
-        args:
-            data: a tuple of (X,y) for the dataset used.
-            neg: a list of top-k negative hard examples.
-            pos: a list of top-k positive hard examples.
-
-        Returns:
-            a score from 0.0 to 1.0 showing how hard found examples are.
-            Here, a higher score means better pairs.
-        """
-        pass
+        raise NotImplementedError
