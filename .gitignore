@@ -1,3 +1,6 @@
+# Jupyter notebooks
+*.ipynb
+
 # Visual studio code
 .vscode/
 
