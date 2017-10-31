@@ -16,7 +16,7 @@ def position_map(X):
         pos[i] = (float(X[i, 0]), float(X[i, 1]))
     return pos
 
-def knn_graph(X, k_neighbors):
+def knn_graph(X, k_neighbors, weighted=True):
     """
     Returns a directed graph where each datapoint is connected to its *k*-nearest
     other datapoints.
@@ -33,13 +33,14 @@ def knn_graph(X, k_neighbors):
     G = nx.from_scipy_sparse_matrix(A, create_using=nx.DiGraph())
 
     # Setting euclidean distance as edge weight.
-    for v in G.node:
-        for u in G[v]:
-            G[v][u]['weight'] = float(G[v][u]['weight'])
+    if weighted is True:
+        for v in G.node:
+            for u in G[v]:
+                G[v][u]['weight'] = float(G[v][u]['weight'])
 
     return G
 
-def epsilon_ball_graph(X, epsilon):
+def epsilon_ball_graph(X, epsilon, weighted=True):
     """
     Returns an undirected graph where each datapoint is connected to other
     datapoints at most **_epsilon_** distance away.
@@ -58,9 +59,10 @@ def epsilon_ball_graph(X, epsilon):
     G = nx.from_numpy_matrix(A)
 
     # Setting euclidean distance as edge weight.
-    for v in G.node:
-        for u in G[v]:
-            G[v][u]['weight'] = float(G[v][u]['weight'])
+    if weighted is True:
+        for v in G.node:
+            for u in G[v]:
+                G[v][u]['weight'] = float(G[v][u]['weight'])
 
     return G
 
