@@ -10,10 +10,10 @@ class GraphExamples(HardExamples):
     """
 
     def __init__(self, data):
-        super(GraphExamples, self).__init__(self, data)
+        super(GraphExamples, self).__init__(data)
 
-    def find_positive(self, k):
+    def find_positive(self, k, *args):
         pass
 
-    def find_negative(self, k):
+    def find_negative(self, k, *args):
         pass

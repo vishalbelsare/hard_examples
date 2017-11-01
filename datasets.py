@@ -70,8 +70,8 @@ def iris(remove_first_class=False, use_PCA=False):
     """Loads IRIS dataset"""
     X, y = load_iris(return_X_y=True)
     if remove_first_class:
-        X = X[:50]
-        y = y[:50]
+        X = X[y != 0, :]
+        y = y[y != 0]
     if use_PCA is True:
         X = PCA(n_components=2).fit_transform(X)
     return X, y
