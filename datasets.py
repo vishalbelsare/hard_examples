@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
 import networkx as nx
 from scipy.spatial.distance import euclidean, pdist, squareform
+from utility import euclidean_similarity_matrix
 
 def position_map(X):
     """Returns the position (pos[v]) of each vertex (v) as a dictionary"""
@@ -16,7 +17,7 @@ def position_map(X):
         pos[i] = (float(X[i, 0]), float(X[i, 1]))
     return pos
 
-def knn_graph(X, k_neighbors, weighted=True):
+def knn_graph(X, k_neighbors, weighted=True, similarity=False):
     """
     Returns a directed graph where each datapoint is connected to its *k*-nearest
     other datapoints.
@@ -34,9 +35,13 @@ def knn_graph(X, k_neighbors, weighted=True):
 
     # Setting euclidean distance as edge weight.
     if weighted is True:
+        if similarity is True:
+            W = euclidean_similarity_matrix(X)
+        else:
+            W = squareform(pdist(X, 'euclidean'))
         for v in G.node:
             for u in G[v]:
-                G[v][u]['weight'] = float(G[v][u]['weight'])
+                G[v][u]['weight'] = float(W[v][u])
 
     return G
 
